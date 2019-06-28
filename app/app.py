@@ -16,6 +16,8 @@ ATTR_LATITUDE = 'latitude'
 ATTR_LONGITUDE = 'longitude'
 ATTR_POS_AMBIGUITY = 'posambiguity'
 ATTR_SPEED = 'speed'
+DEFAULT_APRS_HOST = 'rotate.aprs.net'
+DEFAULT_TRACCAR_HOST = 'http://traccar:8082'
 FILTER_PORT = 14580
 MSG_FORMATS = ['compressed', 'uncompressed', 'mic-e']
 
@@ -76,13 +78,17 @@ class AprsListenerThread(threading.Thread):
 
     def tx_to_traccar(self, query: str):
         """Send position report to Traccar server"""
-        post = requests.post(f"{self.traccar_host}/?{query}")
-        logging.debug(f"POST {post.status_code} {post.reason} - {post.content.decode()}")
-        if post.status_code == 400:
-            logging.warning(
-                f"Error {post.status_code}: {post.reason}. Please create device with matching identifier on Traccar server.")
-        elif post.status_code > 299:
-            logging.error(f"POST {post.status_code} {post.reason} - {post.content.decode()}")
+        url = f"{self.traccar_host}/?{query}"
+        try:
+            post = requests.post(url)
+            logging.debug(f"POST {post.status_code} {post.reason} - {post.content.decode()}")
+            if post.status_code == 400:
+                logging.warning(
+                    f"Error {post.status_code}: {post.reason}. Please create device with matching identifier on Traccar server.")
+            elif post.status_code > 299:
+                logging.error(f"POST {post.status_code} {post.reason} - {post.content.decode()}")
+        except Exception as e:
+            logging.exception(f"Error sending to {url}")
 
     def rx_msg(self, msg: dict):
         """Receive message and process if position."""
@@ -112,13 +118,14 @@ if __name__ == '__main__':
     log_level = os.environ.get("LOG_LEVEL", "INFO")
 
     logging.basicConfig(level=log_level)
+
     callsign = os.environ.get("CALLSIGN")
-    aprs_host = os.environ.get("APRS_HOST", "rotate.aprs.net")
+    aprs_host = os.environ.get("APRS_HOST", DEFAULT_APRS_HOST)
     filter = os.environ.get("APRS_FILTER", f"b/{callsign}")
-    traccar_host = os.environ.get("TRACCAR_HOST", "http://traccar:8082")
+    traccar_host = os.environ.get("TRACCAR_HOST", DEFAULT_TRACCAR_HOST)
 
     if not callsign:
-        print("Please provide your callsign to login to the APRS server.")
+        logging.fatal("Please provide your callsign to login to the APRS server.")
         exit(1)
 
     ALT = AprsListenerThread(callsign, aprs_host, filter, traccar_host)
