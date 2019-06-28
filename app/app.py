@@ -1,5 +1,6 @@
 import logging
 import os
+import signal
 import threading
 
 import aprslib
@@ -79,6 +80,7 @@ class AprsListenerThread(threading.Thread):
 
     def stop(self):
         """Close the connection to the APRS network."""
+        LOGGER.debug(f"stop()")
         self.ais.close()
 
     def tx_to_traccar(self, query: str):
@@ -125,6 +127,14 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=log_level)
 
+    def sig_handler(sig_num, frame):
+        logging.debug(f"Caught signal {sig_num}: {frame}")
+        logging.info("Exiting program.")
+        exit(0)
+
+    signal.signal(signal.SIGTERM, sig_handler)
+    signal.signal(signal.SIGINT, sig_handler)
+
     callsign = os.environ.get("CALLSIGN")
     aprs_host = os.environ.get("APRS_HOST", DEFAULT_APRS_HOST)
     filter = os.environ.get("APRS_FILTER", f"b/{callsign}")
@@ -136,4 +146,4 @@ if __name__ == '__main__':
         exit(1)
 
     ALT = AprsListenerThread(callsign, aprs_host, filter, traccar_host, password)
-    ALT.start()
+    ALT.run()
