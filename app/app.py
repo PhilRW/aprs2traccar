@@ -17,6 +17,7 @@ ATTR_LONGITUDE = 'longitude'
 ATTR_POS_AMBIGUITY = 'posambiguity'
 ATTR_SPEED = 'speed'
 DEFAULT_APRS_HOST = 'rotate.aprs.net'
+DEFAULT_APRS_PASSWORD = '-1'
 DEFAULT_TRACCAR_HOST = 'http://traccar:8082'
 FILTER_PORT = 14580
 MSG_FORMATS = ['compressed', 'uncompressed', 'mic-e']
@@ -54,7 +55,7 @@ class AprsListenerThread(threading.Thread):
             aprs_host: str,
             aprs_server_filter: str,
             traccar_host: str,
-            aprs_password: str = "-1"):
+            aprs_password: str = DEFAULT_APRS_PASSWORD):
         """Initialize the class."""
         super().__init__()
 
@@ -126,11 +127,12 @@ if __name__ == '__main__':
     callsign = os.environ.get("CALLSIGN")
     aprs_host = os.environ.get("APRS_HOST", DEFAULT_APRS_HOST)
     filter = os.environ.get("APRS_FILTER", f"b/{callsign}")
+    password = os.environ.get("APRS_PASSWORD", DEFAULT_APRS_PASSWORD)
     traccar_host = os.environ.get("TRACCAR_HOST", DEFAULT_TRACCAR_HOST)
 
     if not callsign:
         logging.fatal("Please provide your callsign to login to the APRS server.")
         exit(1)
 
-    ALT = AprsListenerThread(callsign, aprs_host, filter, traccar_host)
+    ALT = AprsListenerThread(callsign, aprs_host, filter, traccar_host, password)
     ALT.start()
