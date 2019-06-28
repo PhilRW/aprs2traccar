@@ -6,14 +6,15 @@ import aprslib
 import geopy.distance
 import requests
 
+ATTR_ACCURACY = 'accuracy'
 ATTR_ALTITUDE = 'altitude'
 ATTR_COMMENT = 'comment'
 ATTR_COURSE = 'course'
 ATTR_FORMAT = 'format'
 ATTR_FROM = 'from'
-ATTR_GPS_ACCURACY = 'gps_accuracy'
-ATTR_LATITUDE = 'latitude'
-ATTR_LONGITUDE = 'longitude'
+ATTR_ID = 'id'
+ATTR_LATITUDE = 'lat'
+ATTR_LONGITUDE = 'lon'
 ATTR_POS_AMBIGUITY = 'posambiguity'
 ATTR_SPEED = 'speed'
 DEFAULT_APRS_HOST = 'rotate.aprs.net'
@@ -103,12 +104,12 @@ class AprsListenerThread(threading.Thread):
             lat = msg[ATTR_LATITUDE]
             lon = msg[ATTR_LONGITUDE]
 
-            query_string = f"id={dev_id}&lat={lat}&lon={lon}"
+            query_string = f"{ATTR_ID}={dev_id}&{ATTR_LATITUDE}={lat}&{ATTR_LONGITUDE}={lon}"
 
             if ATTR_POS_AMBIGUITY in msg:
                 pos_amb = msg[ATTR_POS_AMBIGUITY]
                 try:
-                    query_string += f"&hdop={gps_accuracy((lat, lon), pos_amb)}"
+                    query_string += f"&{ATTR_ACCURACY}={gps_accuracy((lat, lon), pos_amb)}"
                 except ValueError:
                     LOGGER.warning(f"APRS message contained invalid posambiguity: {pos_amb}")
             for attr in [ATTR_ALTITUDE,
