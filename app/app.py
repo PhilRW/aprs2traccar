@@ -78,16 +78,17 @@ class AprsListenerThread(threading.Thread):
 
     def tx_to_traccar(self, query: str):
         """Send position report to Traccar server"""
+        LOGGER.debug(f"tx_to_traccar({query})")
         url = f"{self.traccar_host}/?{query}"
         try:
             post = requests.post(url)
             logging.debug(f"POST {post.status_code} {post.reason} - {post.content.decode()}")
             if post.status_code == 400:
                 logging.warning(
-                    f"Error {post.status_code}: {post.reason}. Please create device with matching identifier on Traccar server.")
+                    f"{post.status_code}: {post.reason}. Please create device with matching identifier on Traccar server.")
             elif post.status_code > 299:
-                logging.error(f"POST {post.status_code} {post.reason} - {post.content.decode()}")
-        except Exception as e:
+                logging.error(f"{post.status_code} {post.reason} - {post.content.decode()}")
+        except OSError:
             logging.exception(f"Error sending to {url}")
 
     def rx_msg(self, msg: dict):
