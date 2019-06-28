@@ -50,7 +50,10 @@ def gps_accuracy(gps, posambiguity: int) -> int:
 class AprsListenerThread(threading.Thread):
     """APRS message listener."""
 
-    def __init__(self, callsign: str, aprs_host: str, aprs_server_filter: str, traccar_host: str,
+    def __init__(self, callsign: str,
+            aprs_host: str,
+            aprs_server_filter: str,
+            traccar_host: str,
             aprs_password: str = "-1"):
         """Initialize the class."""
         super().__init__()
