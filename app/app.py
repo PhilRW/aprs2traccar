@@ -13,9 +13,8 @@ ATTR_COMMENT = 'comment'
 ATTR_COURSE = 'course'
 ATTR_FORMAT = 'format'
 ATTR_FROM = 'from'
-ATTR_ID = 'id'
-ATTR_LATITUDE = 'lat'
-ATTR_LONGITUDE = 'lon'
+ATTR_LATITUDE = 'latitude'
+ATTR_LONGITUDE = 'longitude'
 ATTR_POS_AMBIGUITY = 'posambiguity'
 ATTR_SPEED = 'speed'
 DEFAULT_APRS_HOST = 'rotate.aprs.net'
@@ -23,6 +22,9 @@ DEFAULT_APRS_PASSWORD = '-1'
 DEFAULT_TRACCAR_HOST = 'http://traccar:8082'
 FILTER_PORT = 14580
 MSG_FORMATS = ['compressed', 'uncompressed', 'mic-e']
+Q_ID = 'id'
+Q_LAT = 'lat'
+Q_LON = 'lon'
 
 LOGGER = logging.getLogger(__name__)
 
@@ -106,7 +108,7 @@ class AprsListenerThread(threading.Thread):
             lat = msg[ATTR_LATITUDE]
             lon = msg[ATTR_LONGITUDE]
 
-            query_string = f"{ATTR_ID}={dev_id}&{ATTR_LATITUDE}={lat}&{ATTR_LONGITUDE}={lon}"
+            query_string = f"{Q_ID}={dev_id}&{Q_LAT}={lat}&{Q_LON}={lon}"
 
             if ATTR_POS_AMBIGUITY in msg:
                 pos_amb = msg[ATTR_POS_AMBIGUITY]
