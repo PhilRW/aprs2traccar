@@ -95,6 +95,7 @@ class AprsListenerThread(threading.Thread):
             if post.status_code == 400:
                 logging.warning(
                     f"{post.status_code}: {post.reason}. Please create device with matching identifier on Traccar server.")
+                raise ValueError(400)
             elif post.status_code > 299:
                 logging.error(f"{post.status_code} {post.reason} - {post.content.decode()}")
         except OSError:
@@ -121,7 +122,10 @@ class AprsListenerThread(threading.Thread):
                 if attr in msg:
                     query_string += f"&{attr}={msg[attr]}"
 
-            self.tx_to_traccar(query_string)
+            try:
+                self.tx_to_traccar(query_string)
+            except ValueError:
+                logging.warning(f"{Q_ID}={dev_id}")
 
 
 if __name__ == '__main__':
@@ -129,10 +133,12 @@ if __name__ == '__main__':
 
     logging.basicConfig(level=log_level)
 
+
     def sig_handler(sig_num, frame):
         logging.debug(f"Caught signal {sig_num}: {frame}")
         logging.info("Exiting program.")
         exit(0)
+
 
     signal.signal(signal.SIGTERM, sig_handler)
     signal.signal(signal.SIGINT, sig_handler)
